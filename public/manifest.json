@@ -1,0 +1,13 @@
+{
+    "name": "Mobile Web Service",
+    "short_name": "mws",
+    "background_color": "#fffffff",
+    "display": "minimal-ui",
+    "start_url": "/",
+    "icons": {
+        "src": "./vite.svg",
+        "type": "image/svg+xml",
+        "size": "192x192",
+        "purpose": "any"
+    }
+}

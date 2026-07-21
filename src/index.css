@@ -1,0 +1,129 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+html[data-theme="light"] {
+  --bg-color: #ffffff;
+  --text-color: #121212;
+}
+
+html[data-theme="dark"] {
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+}
+
+
+.app-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+header {
+  width: 100%;
+  padding: 1rem;
+  height: 60px;
+  border: 2px solid rgb(226, 226, 226);
+}
+
+nav {
+  width: 100%;
+  padding: 1rem;
+  height: 60px;
+  border: 2px solid rgb(226, 226, 226);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+a {
+  color: white;
+}
+
+.main-container {
+  width: 100%;
+  height: 70vh;
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  gap: 1rem;
+}
+
+.carousel-item {
+  flex: 0 0 auto;
+  width: 250px;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+h4 {
+  margin: 1rem 0 0 0;
+}
+
+.recommendation-news {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.recommendation-item {
+  width: 100%;
+  margin: 2rem 0;
+}
+
+.recommendation-item img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-cover {
+  width: 100%;
+}
+
+.menu {
+  display: flex;
+}
+
+.categories-list button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background: white;
+  color: #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.categories-list button.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.categories-list button:hover {
+  opacity: .9;
+}
