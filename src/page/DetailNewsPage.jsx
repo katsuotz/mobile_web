@@ -24,7 +24,7 @@ const DetailNewsPage = () => {
     }, [slug])
     return (
         <>
-            <Header title={"Detail News"}></Header>
+            <Header title="Detail News" showBack />
 
             <div className="main-container">
                 <p>Category: {news.category && news.category.name}</p>
