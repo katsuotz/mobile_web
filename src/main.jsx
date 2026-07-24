@@ -7,15 +7,19 @@ import { ThemeProvider } from './Context/ThemeContext.jsx'
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js")
-      .then((regis) => {
-        console.log('sw registerd', regis)
+    navigator.serviceWorker.register("/service-worker.js")
+      .then((registration) => {
+        console.log("Service worker registered successfully", registration)
       })
-      .catch((err) => {
-        console.log('sw regis error', err)
+      .catch((error) => {
+        console.error("Service worker registration failed", error)
       })
   })
 }
+
+window.addEventListener("offline", () => {
+  window.location.assign("/game.html")
+})
 
 
 createRoot(document.getElementById('root')).render(
