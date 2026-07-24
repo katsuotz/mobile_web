@@ -1,7 +1,13 @@
+import { useEffect } from "react"
 import { useNavigate } from "react-router"
 
 const Header = ({ title, showBack = false }) => {
     const navigate = useNavigate()
+
+    useEffect(() => {
+        document.title = title
+    }, [title])
+
     return (
         <header className="app-header">
             {showBack && <button className="back-button" type="button" onClick={() => navigate(-1)} aria-label="Go back">←</button>}
