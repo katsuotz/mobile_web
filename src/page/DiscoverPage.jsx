@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import Header from '../components/Header'
 import axios from 'axios'
 import { Link } from 'react-router'
@@ -20,6 +20,7 @@ const DiscoverPage = () => {
     const [selectedCategory, setSelectedCategory] = useState("")
 
     const containerRef = useRef(null)
+    const observerRef = useRef(null)
 
     useEffect(() => {
         const searchHandler = setTimeout(() => {
@@ -34,66 +35,65 @@ const DiscoverPage = () => {
             try {
                 const res = await axios.get(`${apiUrl}/categories`)
                 setCategories(res.data.categories)
-                console.log(res.data.categories);
-
             } catch (err) {
-                console.log(err.response);
-
+                console.log(err.response)
             }
         }
 
         handleCategories()
     }, [apiUrl])
 
+    const fetchPosts = useCallback(async (pageToFetch, isReset) => {
+        setIsLoading(true)
+        setError(null)
+
+        try {
+            const params = {
+                page: pageToFetch,
+                per_page: 3,
+            }
+
+            if (searchParams) params.search = searchParams
+            if (selectedCategory) params.category = selectedCategory
+
+            const query = new URLSearchParams(params).toString()
+            const res = await axios.get(`${apiUrl}/posts?${query}`)
+
+            const items = res.data.data.items
+
+            setPosts(prev => (isReset ? items : [...prev, ...items]))
+            setPage(pageToFetch)
+            setIsHasMore(pageToFetch < res.data.data.total_page)
+        } catch (err) {
+            console.log(err)
+            setError(err)
+        } finally {
+            setIsLoading(false)
+        }
+    }, [apiUrl, searchParams, selectedCategory])
 
     useEffect(() => {
-        const getPosts = async () => {
-            if (!isHasMore && page !== 1) return
+        setIsHasMore(true)
+        fetchPosts(1, true)
+    }, [searchParams, selectedCategory])
 
-            setIsLoading(true)
-            setError(null)
+    const lastPostRef = useCallback((node) => {
+        if (isLoading) return
 
-            try {
-                const params = {
-                    page: page,
-                    per_page: 3
-                }
+        if (observerRef.current) observerRef.current.disconnect()
 
-                if (searchParams) params.search = searchParams
-                if (selectedCategory) params.category = selectedCategory
-
-                const queryString = new URLSearchParams(params).toString()
-
-
-                const res = await axios.get(`${apiUrl}/posts?${queryString}`)
-
-                const newPosts = res.data.data.items
-                console.log(newPosts);
-
-                setPosts(prev => page === 1 ? newPosts : [...prev, ...newPosts])
-                setIsHasMore(newPosts.length > 0 && page < res.data.data.totalPage)
-            } catch (err) {
-                console.log(err.response);
-
-            } finally {
-                setIsLoading(false)
+        observerRef.current = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && isHasMore) {
+                fetchPosts(page + 1, false)
             }
-        }
+        }, {
+            root: containerRef.current,
+            rootMargin: '100px',
+            threshold: 0,
+        })
 
-        getPosts()
-    }, [apiUrl, page, selectedCategory, isHasMore, searchParams])
-
-    useEffect(() => {
-        const handleScroll = () => {
-            const container = containerRef.current
-            if (container.scrollHeight === container.scrollTop + container.clientHeight && isHasMore && !loading) {
-                setPage(prev => prev + 1)
-            }
-        }
-
-        const container = containerRef.current
-        container.addEventListener('scroll', handleScroll)
-    }, [isHasMore, isLoading])
+        if (node) observerRef.current.observe(node)
+    }, [isLoading, isHasMore, page, fetchPosts])
 
     const handleAddBookmark = (id) => {
         setBookmark(prev => prev.includes(id) ? prev.filter(e => e !== id) : [...prev, id])
@@ -112,31 +112,48 @@ const DiscoverPage = () => {
             <div className="main-container" ref={containerRef}>
                 <input type="text" id='search' value={search} onChange={e => setSearch(e.target.value)} />
 
-                <select name="selectedCategory" id="selectedCategory" value={selectedCategory} onChange={(e) => {
-                    setSelectedCategory(e.target.value)
-                    setPage(1)
-                    setPosts([])
-                    setIsHasMore(true)
-                }}>
+                <select
+                    name="selectedCategory"
+                    id="selectedCategory"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                >
                     <option value="">All Category</option>
                     {categories.map(category => (
-                        <option value={category.slug}>{category.name}</option>
+                        <option key={category.slug} value={category.slug}>{category.name}</option>
                     ))}
                 </select>
 
-                {posts && posts.length > 0 ? posts.map(news => (
-                    <div className="recommendation-item">
-                        <Link to={`/posts/${news.slug}`}>
-                            <img src={news.thumbnail} alt={news.title} />
-                            <h5>{news.title}</h5>
-                            <p>{news.category.icon} {news.category.slug}</p>
-                        </Link>
-                        <button onClick={() => handleAddBookmark(news.id)}>⭐</button>
-                    </div>
+                <div className="recommendation-news">
+                    {posts.length > 0 ? (
+                        posts.map((news, index) => {
+                            const isLast = index === posts.length - 1
 
-                )) : (
-                    <p>No Discover News</p>
-                )}
+                            return (
+                                <div
+                                    key={news.id}
+                                    className="recommendation-item"
+                                    ref={isLast ? lastPostRef : null}
+                                >
+                                    <Link to={`/posts/${news.slug}`}>
+                                        <img src={news.thumbnail} alt={news.title} />
+                                        <h5>{news.title}</h5>
+                                        <p>{news.category.icon} {news.category.slug}</p>
+                                    </Link>
+
+                                    <button onClick={() => handleAddBookmark(news.id)}>
+                                        ⭐
+                                    </button>
+                                </div>
+                            )
+                        })
+                    ) : (
+                        !isLoading && <p>No Discover News</p>
+                    )}
+                </div>
+
+                {isLoading && <p>Loading...</p>}
+                {!isHasMore && posts.length > 0 && <p>No more posts</p>}
             </div>
         </>
     )

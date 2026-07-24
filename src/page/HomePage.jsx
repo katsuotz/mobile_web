@@ -23,7 +23,6 @@ const HomePage = () => {
             }
         }
 
-
         getNews()
     }, [])
     return (

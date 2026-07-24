@@ -23,7 +23,6 @@ const BookmarkPage = () => {
         }
     }
 
-
     useEffect(() => {
         getNews()
     }, [apiUrl])
@@ -44,19 +43,21 @@ const BookmarkPage = () => {
             <Header title="Bookmark"></Header>
 
             <div className="main-container">
-                {bookmarks && bookmarks.length > 0 ? bookmarks.map(news => (
-                    <div className="recommendation-item">
-                        <Link to={`/posts/${news.slug}`}>
-                            <img src={news.thumbnail} alt={news.title} />
-                            <h5>{news.title}</h5>
-                            <p>{news.category.icon} {news.category.slug}</p>
-                        </Link>
-                        <button onClick={() => handleAddBookmark(news.id)}>⭐</button>
-                    </div>
+                <div className="recommendation-news">
+                    {bookmarks && bookmarks.length > 0 ? bookmarks.map(news => (
+                        <div className="recommendation-item">
+                            <Link to={`/posts/${news.slug}`}>
+                                <img src={news.thumbnail} alt={news.title} />
+                                <h5>{news.title}</h5>
+                                <p>{news.category.icon} {news.category.slug}</p>
+                            </Link>
+                            <button onClick={() => handleAddBookmark(news.id)}>⭐</button>
+                        </div>
 
-                )) : (
-                    <p>No Bookmark News</p>
-                )}
+                    )) : (
+                        <p>No Bookmark News</p>
+                    )}
+                </div>
             </div>
         </>
     )
